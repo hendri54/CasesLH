@@ -1,13 +1,14 @@
 name = "CasesLH"
 uuid = "154532ee-98b9-4eab-88d3-567e736435ea"
 authors = ["hendri54 <hendricksl@protonmail.com> and contributors"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 
 [compat]
-julia = "1"
+julia = "1.5"
+DocStringExtensions = "0.8"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

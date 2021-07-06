@@ -1,5 +1,5 @@
 export Modifier
-export make_string, make_modifier, make_modifier_vector
+export make_string, make_modifier, make_modifier_vector, main_mod
 
 """
 	$(SIGNATURES)

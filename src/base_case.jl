@@ -1,6 +1,7 @@
-export CaseSpec
-export make_case_spec, has_mods, get_mods, has_modifier, replace_mods
-export has_xp_mods, get_xp_mods, has_xp_modifier, replace_xp_mods
+export CaseSpec, BaseMods, XpMods
+export make_case_spec, has_mods, get_mods, has_modifier, replace_mods, base_name, modifier_string
+export has_xp_mods, get_xp_mods, has_xp_modifier, replace_xp_mods, remove_xp_mods, exper_string
+export case_fn
 
 struct BaseMods end
 struct XpMods end
@@ -30,6 +31,9 @@ function CaseSpec(bn :: Symbol, xpModV = Vector{Modifier}())
     return CaseSpec(bn, Vector{Modifier}(), xpModV);
 end
 
+CaseSpec(bn :: Symbol, xpMod :: Modifier{T}) where T = 
+    CaseSpec(bn, [xpMod]);
+
 # 2 vectors are interpreted as [base], [experiment]
 function CaseSpec(cv :: AbstractVector, xpV :: AbstractVector = Vector{Modifier}())
     baseName = cv[1];
@@ -42,9 +46,13 @@ function CaseSpec(cv :: AbstractVector, xpV :: AbstractVector = Vector{Modifier}
 end
 
 # Nested vectors are interpreted as ([base], [experiment])
-function CaseSpec(vv :: Tuple{Vector{T1}, Vector{T2}}) where {T1, T2}
+function CaseSpec(vv :: Tuple{T1, Vector{T2}}) where {T1, T2}
     return CaseSpec(vv...);
 end
+
+# function CaseSpec(vv :: Tuple{Vector{T1}, Vector{T2}}) where {T1, T2}
+#     return CaseSpec(vv...);
+# end
 
 
 """
@@ -137,6 +145,7 @@ replace_mods(cn :: CaseSpec, newMods) where T =
     CaseSpec(base_name(cn), newMods, get_xp_mods(cn));
 replace_xp_mods(cn :: CaseSpec, newMods) where T =
     CaseSpec(base_name(cn), get_mods(cn), newMods);
+remove_xp_mods(cn :: CaseSpec) = replace_xp_mods(cn, Vector{Modifier}());
 
 
 ## ---------- Show (as string)
@@ -151,25 +160,48 @@ function make_string(cn :: CaseSpec)
     return base_case_string(cn) * exper_string(cn);
 end
 
-function base_case_string(cn :: CaseSpec)
-    s = "[" * string(base_name(cn));
+function base_case_string(cn :: CaseSpec; brackets = true)
+    s = string(base_name(cn));
     if has_mods(cn)
         s = s * "_" * make_string(get_mods(cn));
     end
-    s = s * "]";
+    if brackets
+        s = "[" * s * "]";
+    end
     return s
 end
 
-function exper_string(cn)
-    if has_xp_mods(cn)
-        return "[" * make_string(get_xp_mods(cn)) * "]";
+function modifier_string(cn :: CaseSpec; brackets = true)
+    if has_mods(cn)
+        s = make_string(get_mods(cn));
+        if brackets
+            s = "[" * s * "]";
+        end
     else
-        return "[Base]";
+        s = "";
     end
+    return s
 end
 
+function exper_string(cn :: CaseSpec; brackets = true)
+    if has_xp_mods(cn)
+        s = make_string(get_xp_mods(cn));
+    else
+        s = "Base";
+    end
+    if brackets
+        s = "[" * s * "]";
+    end
+    return s
+end
 
 Base.show(io :: IO, cn :: CaseSpec) = print(io, make_string(cn));
+
+# Used for file names
+function case_fn(cn :: CaseSpec)
+    return base_case_string(cn; brackets = false) * "_XP_" * 
+        exper_string(cn; brackets = false);
+end
 
 
 
