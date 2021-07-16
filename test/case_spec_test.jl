@@ -62,16 +62,43 @@ end
 
 function modify_test()
     @testset "Modify" begin
-        c1 = CaseSpec(:test, [:two, :three]);
+        xpModV = [:two, :three];
+        c1 = CaseSpec(:test, xpModV);
         @test has_xp_mods(c1);
         c2 = remove_xp_mods(c1);
         @test !has_xp_mods(c2);
+
+        c3 = add_modifier(c1, :test2);
+        @test isequal(c3, CaseSpec([:test, :test2], xpModV));
+
+        c1 = CaseSpec([:test1, :test2], xpModV);
+        c2 = add_modifier(c1, :test11);
+        @test isequal(c2, CaseSpec([:test1, :test11, :test2], xpModV));
+
+        c1 = CaseSpec(:test);
+        c2 = add_modifier(c1, (:test, 10));
+        @test isequal(c2, CaseSpec([:test, (:test, 10)]));
+    end
+end
+
+function find_main_mod_test()
+    @testset "Find main mod" begin
+        c1 = CaseSpec([:test, :one]);
+        @test isnothing(find_main_mod(c1, :two));
+        c2 = add_modifier(c1, :two);
+        m = find_main_mod(c2, :two);
+        @test isequal(m, Modifier(:two));
+
+        c3 = add_modifier(c1, (:two, 2));
+        m = find_main_mod(c3, :two);
+        @test isequal(m, Modifier((:two, 2)));
     end
 end
 
 @testset "CaseSpec" begin
     case_spec_test();
     modify_test();
+    find_main_mod_test();
 end
 
 # ----------

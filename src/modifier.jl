@@ -13,6 +13,21 @@ end
 main_mod(x :: Modifier{Symbol}) = x.m;
 main_mod(x :: Modifier{T}) where T = x.m[1];
 
+function find_main_mod(xV :: AbstractVector, mainMod :: Symbol)
+    if isempty(xV)
+        return nothing
+    else
+        # matchV = [main_mod(x) == mainMod  for x in xV];
+        j = findfirst(x -> main_mod(x) == mainMod,  xV);
+        if isnothing(j)
+            return nothing
+        else
+            return xV[j]
+        end
+    end
+end
+
+
 """
 	$(SIGNATURES)
 
@@ -34,7 +49,7 @@ function make_modifier_vector(v :: AbstractVector)
     end
 end
 
-make_modifier_vector(v :: AbstractVector{Modifier}) = v;
+make_modifier_vector(v :: AbstractVector{Modifier}) = sort(v);
 
 
 Base.show(io :: IO, m :: Modifier{T}) where T = 

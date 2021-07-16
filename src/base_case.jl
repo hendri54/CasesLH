@@ -1,5 +1,5 @@
 export CaseSpec, BaseMods, XpMods
-export make_case_spec, has_mods, get_mods, has_modifier, replace_mods, base_name, modifier_string
+export make_case_spec, has_mods, get_mods, has_modifier, find_main_mod, replace_mods, base_name, modifier_string, add_modifier
 export has_xp_mods, get_xp_mods, has_xp_modifier, replace_xp_mods, remove_xp_mods, exper_string
 export case_fn
 
@@ -11,6 +11,8 @@ struct XpMods end
 	$(SIGNATURES)
 
 Contains base name and a list of (sorted) modifications.
+
+Note: The order of modifiers does not matter. They are always sorted.
 """
 struct CaseSpec
     baseName :: Symbol
@@ -108,6 +110,19 @@ has_modifier(cn :: CaseSpec, ::Type{BaseMods}, modName) =
 has_modifier(cn :: CaseSpec, ::Type{XpMods}, modName) = 
     has_xp_modifier(cn, modName);
 
+"""
+	$(SIGNATURES)
+
+Find modifier that has the target main modifier. Returns `nothing if not found`.
+"""
+function find_main_mod(cn :: CaseSpec, mainMod :: Symbol)
+    if has_mods(cn)
+        return find_main_mod(get_mods(cn), mainMod);
+    else
+        return nothing
+    end
+end
+
 function Base.isequal(cn1 :: CaseSpec, cn2 :: CaseSpec)
     return equal_base_names(cn1, cn2)  &&  equal_mods(cn1, cn2)  &&
         equal_xp_mods(cn1, cn2);
@@ -139,13 +154,29 @@ equal_mods(cnV...) = equal_modifiers(BaseMods, cnV...);
 equal_xp_mods(cnV...) = equal_modifiers(XpMods, cnV...);
 
 
-## -----------  Apply experiment
+## -----------  Apply modifiers
 
-replace_mods(cn :: CaseSpec, newMods) where T =
+replace_mods(cn :: CaseSpec, newMods) =
     CaseSpec(base_name(cn), newMods, get_xp_mods(cn));
-replace_xp_mods(cn :: CaseSpec, newMods) where T =
+replace_xp_mods(cn :: CaseSpec, newMods) =
     CaseSpec(base_name(cn), get_mods(cn), newMods);
 remove_xp_mods(cn :: CaseSpec) = replace_xp_mods(cn, Vector{Modifier}());
+
+"""
+	$(SIGNATURES)
+
+Add modifiers to an existing CaseSpec. Errors if any of the modifiers already exist.
+"""
+function add_modifier(cn :: CaseSpec, modName; ignoreExisting = false)
+    newMod = make_modifier(modName);
+    if has_modifier(cn, newMod)
+        if !ignoreExisting
+            error("Modifier $modName already exists.");
+        end
+    else
+        return CaseSpec(base_name(cn), vcat(get_mods(cn), newMod), get_xp_mods(cn));
+    end
+end
 
 
 ## ---------- Show (as string)
