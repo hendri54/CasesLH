@@ -8,8 +8,8 @@ function case_spec_test()
         @test !has_modifier(c1, :a);
         @test isequal(c1, CaseSpec(:a));
         @test isequal(make_case_spec(:a), c1);
-        @test isequal(make_string(c1), "[a][Base]");
-        @test isequal(case_fn(c1), "a_XP_Base");
+        @test isequal(make_string(c1), "(a)(Base)");
+        @test isequal(case_fn(c1), join(["a", "XP", "Base"], mdl.Connector));
 
         c2 = CaseSpec([:a, :b, :c])
         @test has_mods(c2);
@@ -17,7 +17,9 @@ function case_spec_test()
         @test isequal(get_mods(c2), [Modifier(:b), Modifier(:c)])
         @test has_modifier(c2, :b)
         @test isequal(make_case_spec(c2), c2)
-        @test isequal(make_string(c2), "[a_b_c][Base]");
+        @test isequal(make_string(c2), 
+            "(" * join(["a", "b", "c"], mdl.Connector) *  ")(Base)");
+        @test isequal(modifier_string(c2),  "(b$(mdl.Connector)c)");
         
 
         c3 = CaseSpec([:a, :c, :b]);
@@ -27,20 +29,20 @@ function case_spec_test()
         c4 = CaseSpec(:a, [:b, :c]);
         @test !has_mods(c4);
         @test has_xp_mods(c4);
-        @test isequal(make_string(c4), "[a][b_c]");
-        @test isequal(case_fn(c4),  "a_XP_b_c");
+        @test isequal(make_string(c4), "(a)(b$(mdl.Connector)c)");
+        @test isequal(case_fn(c4),  join(["a", "XP", "b", "c"], mdl.Connector));
 
         c5 = CaseSpec(:a, [(:b, 1), :c]);
-        @test isequal(make_string(c5), "[a][b1_c]");
+        @test isequal(make_string(c5), "(a)(b1$(mdl.Connector)c)");
 
         arg = ([:a, :b], [(:b, 1), :c]);
         c6 = CaseSpec(arg);
-        @test isequal(make_string(c6), "[a_b][b1_c]");
+        @test isequal(make_string(c6), "(a$(mdl.Connector)b)(b1$(mdl.Connector)c)");
         @test isequal(c6, make_case_spec(arg));
 
         c7 = CaseSpec(arg);
         c7a = replace_xp_mods(c7, [:d, :e]);
-        @test isequal(make_string(c7a), "[a_b][d_e]");
+        @test isequal(make_string(c7a), "(a$(mdl.Connector)b)(d$(mdl.Connector)e)");
 
         arg = (:a, [(:b, 1), :c]);
         c6a = CaseSpec(arg);
@@ -48,7 +50,8 @@ function case_spec_test()
 
         c7 = CaseSpec(arg);
         c7b = replace_mods(c7, [:d, :e]);
-        @test isequal(make_string(c7b), "[a_d_e][b1_c]");
+        @test isequal(make_string(c7b), 
+            "(a$(mdl.Connector)d$(mdl.Connector)e)(b1$(mdl.Connector)c)");
 
         # strV = string_vector(c1; prefixStr = "-");
         # @test length(strV) == 1
@@ -70,10 +73,16 @@ function modify_test()
 
         c3 = add_modifier(c1, :test2);
         @test isequal(c3, CaseSpec([:test, :test2], xpModV));
+        delete_modifier!(c3, :test2);
+        @test !has_modifier(c3, :test2);
+        c3 = add_modifier(c3, :test2);
 
         c1 = CaseSpec([:test1, :test2], xpModV);
         c2 = add_modifier(c1, :test11);
         @test isequal(c2, CaseSpec([:test1, :test11, :test2], xpModV));
+        delete_modifier!(c2, :test11);
+        @test !has_modifier(c2, :test11);
+        c2 = add_modifier(c2, :test11);
 
         c1 = CaseSpec(:test);
         c2 = add_modifier(c1, (:test, 10));

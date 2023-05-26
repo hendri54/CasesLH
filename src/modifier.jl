@@ -1,5 +1,6 @@
 export Modifier
-export make_string, make_modifier, make_modifier_vector, main_mod
+export make_string, make_modifier, make_modifier_vector, main_mod, n_mods;
+export key_value;
 
 """
 	$(SIGNATURES)
@@ -10,8 +11,21 @@ struct Modifier{T}
     m :: T
 end
 
-main_mod(x :: Modifier{Symbol}) = x.m;
+"""
+	$(SIGNATURES)
+
+Return main modifier.
+"""
 main_mod(x :: Modifier{T}) where T = x.m[1];
+main_mod(x :: Modifier{Symbol}) = x.m;
+
+"""
+	$(SIGNATURES)
+
+Return number of modifiers.
+"""
+n_mods(x :: Modifier{T}) where T = length(x.m);
+n_mods(x :: Modifier{Symbol}) = 1;
 
 function find_main_mod(xV :: AbstractVector, mainMod :: Symbol)
     if isempty(xV)
@@ -26,6 +40,31 @@ function find_main_mod(xV :: AbstractVector, mainMod :: Symbol)
         end
     end
 end
+
+
+"""
+    $(SIGNATURES)
+
+Extract a key value from a Modifier.
+The modifier contains (key, value) pairs.
+
+# Example
+```
+keyName = :x;
+mod1 = Modifier([:a, :x, 2.0, :b]);
+key_value(keyName, mod1) == 2.0;
+```
+"""
+function key_value(keyName, mod1 :: Modifier{T}) where T
+    idx = findfirst(x -> (x .== keyName), mod1.m);
+    if isnothing(idx)
+        return nothing;
+    else
+        return mod1.m[idx + 1]
+    end
+end
+
+key_value(keyName, mod1 :: Modifier{Symbol}) = nothing;
 
 
 """
@@ -96,7 +135,7 @@ end
 
 
 function make_string(mods :: AbstractVector{Modifier})
-    modStr = join(make_string.(mods), "_");
+    modStr = join(make_string.(mods), Connector);
 end
 
 

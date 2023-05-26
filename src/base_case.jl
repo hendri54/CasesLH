@@ -1,5 +1,5 @@
 export CaseSpec, BaseMods, XpMods
-export make_case_spec, has_mods, get_mods, has_modifier, find_main_mod, replace_mods, base_name, modifier_string, add_modifier
+export make_case_spec, has_mods, get_mods, has_modifier, find_main_mod, replace_mods, base_name, modifier_string, add_modifier, delete_modifier!;
 export has_xp_mods, get_xp_mods, has_xp_modifier, replace_xp_mods, remove_xp_mods, exper_string
 export case_fn
 
@@ -61,10 +61,20 @@ end
 	$(SIGNATURES)
 
 A simple pass-through function that makes a `CaseSpec` if needed and passes it through otherwise.
+
+# Examples:
+```
+make_case_spec([:base, :baseMod], [:xpMod])
+make_case_spec([:base], [:xpMod])
+```
 """
-make_case_spec(cn :: CaseSpec) = cn;
+make_case_spec(cn :: CaseSpec) = deepcopy(cn);
 # make_case_spec(cn :: Case) = cn.name;
 make_case_spec(cn) = CaseSpec(cn);
+make_case_spec(cBase :: AbstractVector, cExp :: AbstractVector) = 
+    CaseSpec(cBase, cExp);
+make_case_spec(cBase :: Symbol, cExp :: AbstractVector) = 
+    make_case_spec([cBase], cExp);
 
 
 ## --------  Properties
@@ -178,6 +188,17 @@ function add_modifier(cn :: CaseSpec, modName; ignoreExisting = false)
     end
 end
 
+"""
+	$(SIGNATURES)
+
+Delete a modifier. Errors if the modifier is not found.
+"""
+function delete_modifier!(cn :: CaseSpec, modName)
+    @assert has_modifier(cn, modName)  "Cannot delete modifier $modName";
+    idx = findfirst(x -> x == make_modifier(modName), get_mods(cn));
+    deleteat!(cn.mods, idx);
+end
+
 
 ## ---------- Show (as string)
 
@@ -194,20 +215,14 @@ end
 function base_case_string(cn :: CaseSpec; brackets = true)
     s = string(base_name(cn));
     if has_mods(cn)
-        s = s * "_" * make_string(get_mods(cn));
+        s = s * Connector * make_string(get_mods(cn));
     end
-    if brackets
-        s = "[" * s * "]";
-    end
-    return s
+    return inbrackets(s; brackets);
 end
 
 function modifier_string(cn :: CaseSpec; brackets = true)
     if has_mods(cn)
-        s = make_string(get_mods(cn));
-        if brackets
-            s = "[" * s * "]";
-        end
+        s = inbrackets(make_string(get_mods(cn)); brackets);
     else
         s = "";
     end
@@ -220,17 +235,14 @@ function exper_string(cn :: CaseSpec; brackets = true)
     else
         s = "Base";
     end
-    if brackets
-        s = "[" * s * "]";
-    end
-    return s
+    return inbrackets(s; brackets);
 end
 
 Base.show(io :: IO, cn :: CaseSpec) = print(io, make_string(cn));
 
 # Used for file names
 function case_fn(cn :: CaseSpec)
-    return base_case_string(cn; brackets = false) * "_XP_" * 
+    return base_case_string(cn; brackets = false) * Connector * "XP" * Connector * 
         exper_string(cn; brackets = false);
 end
 
