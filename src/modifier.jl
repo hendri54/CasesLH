@@ -133,6 +133,12 @@ function make_string(m :: Tuple{Symbol,T1}) where T1 <: Real
     return "$(m[1])$(s2)";
 end
 
+# Symbols get concatenated
+function make_string(m :: Tuple{Symbol,T1}) where T1
+    s2 = make_string(m[2]);
+    return "$(m[1])$(s2)";
+end
+
 
 function make_string(mods :: AbstractVector{Modifier})
     modStr = join(make_string.(mods), Connector);

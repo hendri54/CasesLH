@@ -19,6 +19,9 @@ function modifier_test()
         m3 = Modifier(:a);
         @test isequal(make_string(m3), "a");
 
+        m4 = Modifier((:x, :y));
+        @test isequal(make_string(m4), "xy");
+
         @test isequal(make_modifier((:z, 2)), Modifier((:z, 2)));
         @test isequal(make_modifier(m3), m3);
     end
