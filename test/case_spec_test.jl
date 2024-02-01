@@ -90,6 +90,14 @@ function modify_test()
     end
 end
 
+function delete_xp_mod_test()
+    @testset "Delete xp modifier" begin
+        c1 = CaseSpec(:test, [:one, :two]);
+        delete_xp_modifier!(c1, :one);
+        @test isequal(c1, CaseSpec(:test, [:two]));
+    end
+end
+
 function find_main_mod_test()
     @testset "Find main mod" begin
         c1 = CaseSpec([:test, :one]);
@@ -107,6 +115,7 @@ end
 @testset "CaseSpec" begin
     case_spec_test();
     modify_test();
+    delete_xp_mod_test();
     find_main_mod_test();
 end
 

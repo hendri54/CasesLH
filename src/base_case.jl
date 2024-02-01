@@ -1,5 +1,5 @@
 export CaseSpec, BaseMods, XpMods
-export make_case_spec, has_mods, get_mods, has_modifier, find_main_mod, replace_mods, base_name, modifier_string, add_modifier, delete_modifier!;
+export make_case_spec, has_mods, get_mods, has_modifier, find_main_mod, replace_mods, base_name, modifier_string, add_modifier, delete_modifier!, delete_xp_modifier!;
 export has_xp_mods, get_xp_mods, has_xp_modifier, replace_xp_mods, remove_xp_mods, exper_string
 export case_fn
 
@@ -199,6 +199,20 @@ function delete_modifier!(cn :: CaseSpec, modName)
     deleteat!(cn.mods, idx);
 end
 
+"""
+    $(SIGNATURES)
+
+Delete an experiment modifier.
+"""
+function delete_xp_modifier!(cname :: CaseSpec, xpMod)
+    xpMod = make_modifier(xpMod);
+    if has_xp_modifier(cname, xpMod)
+        idx = findfirst(x -> x == xpMod, get_xp_mods(cname));
+        deleteat!(get_xp_mods(cname), idx);
+    end
+end
+
+
 
 ## ---------- Show (as string)
 
@@ -220,6 +234,9 @@ function base_case_string(cn :: CaseSpec; brackets = true)
     return inbrackets(s; brackets);
 end
 
+"""
+Describes the base case modifiers.
+"""
 function modifier_string(cn :: CaseSpec; brackets = true)
     if has_mods(cn)
         s = inbrackets(make_string(get_mods(cn)); brackets);
@@ -229,6 +246,9 @@ function modifier_string(cn :: CaseSpec; brackets = true)
     return s
 end
 
+"""
+String with experiment names, such as "(affirmativeAction-tuitionUp1000)".
+"""
 function exper_string(cn :: CaseSpec; brackets = true)
     if has_xp_mods(cn)
         s = make_string(get_xp_mods(cn));
