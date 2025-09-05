@@ -139,6 +139,11 @@ function make_string(m :: Tuple{Symbol,T1}) where T1
     return "$(m[1])$(s2)";
 end
 
+# Fallback
+function make_string(m :: Tuple)
+    return join(make_string.(m));
+end
+
 
 function make_string(mods :: AbstractVector{Modifier})
     modStr = join(make_string.(mods), Connector);
