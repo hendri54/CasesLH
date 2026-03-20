@@ -1,5 +1,6 @@
 export Modifier
 export make_string, make_modifier, make_modifier_vector, main_mod, n_mods;
+export mod_list;
 export key_value;
 
 """
@@ -19,6 +20,16 @@ Return main modifier.
 main_mod(x :: Modifier{T}) where T = x.m[1];
 main_mod(x :: Modifier{Symbol}) = x.m;
 
+
+"""
+    $(SIGNATURES)
+
+Return list of all elements of a modifier as a Vector.
+"""
+mod_list(x :: Modifier) = [x.m...];
+mod_list(x :: Modifier{Symbol}) = [x.m];
+
+
 """
 	$(SIGNATURES)
 
@@ -27,6 +38,11 @@ Return number of modifiers.
 n_mods(x :: Modifier{T}) where T = length(x.m);
 n_mods(x :: Modifier{Symbol}) = 1;
 
+"""
+	$(SIGNATURES)
+
+Find a modifier with a specific main modifier in a vector of modifiers.
+"""
 function find_main_mod(xV :: AbstractVector, mainMod :: Symbol)
     if isempty(xV)
         return nothing

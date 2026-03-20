@@ -7,6 +7,7 @@ function modifier_test()
         m1 = Modifier((:a, 1));
         s1 = make_string(m1);
         @test isequal(s1, "a1");
+        @test isequal(mod_list(m1), [:a, 1]);
 
         m2 = Modifier((:a, 1.0));
         s2 = make_string(m2);
@@ -18,12 +19,15 @@ function modifier_test()
 
         m3 = Modifier(:a);
         @test isequal(make_string(m3), "a");
+        @test isequal(mod_list(m3), [:a]);
 
         m4 = Modifier((:x, :y));
         @test isequal(make_string(m4), "xy");
+        @test isequal(mod_list(m4), [:x, :y]);
 
         m5 = Modifier((:x, 1, true));
         @test isequal(make_string(m5), "x1true");
+        @test isequal(mod_list(m5), [:x, 1, true]);
 
         @test isequal(make_modifier((:z, 2)), Modifier((:z, 2)));
         @test isequal(make_modifier(m3), m3);

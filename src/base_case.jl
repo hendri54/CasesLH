@@ -175,7 +175,7 @@ remove_xp_mods(cn :: CaseSpec) = replace_xp_mods(cn, Vector{Modifier}());
 """
 	$(SIGNATURES)
 
-Add modifiers to an existing CaseSpec. Errors if any of the modifiers already exist.
+Add one modifier to an existing CaseSpec. Errors if the modifier already exists.
 """
 function add_modifier(cn :: CaseSpec, modName; ignoreExisting = false)
     newMod = make_modifier(modName);
@@ -187,6 +187,20 @@ function add_modifier(cn :: CaseSpec, modName; ignoreExisting = false)
         return CaseSpec(base_name(cn), vcat(get_mods(cn), newMod), get_xp_mods(cn));
     end
 end
+
+"""
+	$(SIGNATURES)
+
+Add multiple modifiers to an existing CaseSpec. Errors if any of the modifiers already exist.
+"""
+function add_modifier(cn :: CaseSpec, modName :: AbstractVector; ignoreExisting = false)
+    cn2 = deepcopy(cn);
+    for mod in modName
+        cn2 = add_modifier(cn2, mod; ignoreExisting = ignoreExisting);
+    end
+    return cn2
+end
+
 
 """
 	$(SIGNATURES)

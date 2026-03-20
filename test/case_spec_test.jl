@@ -87,6 +87,10 @@ function modify_test()
         c1 = CaseSpec(:test);
         c2 = add_modifier(c1, (:test, 10));
         @test isequal(c2, CaseSpec([:test, (:test, 10)]));
+
+        c1 = CaseSpec(:test);
+        c2 = add_modifier(c1, [(:test, 10), (:test2, 20)]);
+        @test isequal(c2, CaseSpec([:test, (:test, 10), (:test2, 20)]));
     end
 end
 
